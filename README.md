@@ -1,4 +1,4 @@
-# Diallo-TRADING
+Diallo-TRADING
 Journal de trading interactif et gestionnaire de capital avec simulateur 90 jours et statistiques de performance.
 
 
@@ -7,598 +7,849 @@ Journal de trading interactif et gestionnaire de capital avec simulateur 90 jour
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diallo TRADING - Journal de Trading & Suivi de Capital</title>
+    <title>Diallo TRADING - Dashboard & Journal Modern</title>
+    
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        darkBg: '#0b0f19',
-                        cardBg: '#111827',
-                        cardBorder: '#1f2937',
-                        brandGreen: '#10b981',
-                        brandRed: '#ef4444',
-                        accentBlue: '#3b82f6'
+                        obsidian: '#0A0D14',
+                        cardBg: 'rgba(15, 23, 42, 0.65)',
+                        borderGlass: 'rgba(255, 255, 255, 0.08)',
+                        neonEmerald: '#00F59B',
+                        neonCyan: '#00E5FF',
+                        neonRose: '#FF3B6B',
+                        neonGold: '#FFB800'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+                    },
+                    boxShadow: {
+                        'neon-glow': '0 0 25px -5px rgba(0, 245, 155, 0.25)',
+                        'cyan-glow': '0 0 25px -5px rgba(0, 229, 255, 0.25)',
+                        'rose-glow': '0 0 25px -5px rgba(255, 59, 107, 0.25)'
                     }
                 }
             }
         }
     </script>
+    
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <style>
         body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background-color: #0b0f19;
-            color: #f3f4f6;
+            background-color: #06080E;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(0, 245, 155, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(0, 229, 255, 0.06) 0px, transparent 50%),
+                radial-gradient(at 50% 100%, rgba(15, 23, 42, 0.8) 0px, transparent 100%);
+            background-attachment: fixed;
+            font-family: 'Inter', sans-serif;
+            color: #E2E8F0;
         }
+
+        /* Glassmorphism Styles */
+        .glass-card {
+            background: rgba(13, 19, 33, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card-hover:hover {
+            border-color: rgba(0, 245, 155, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px -10px rgba(0, 245, 155, 0.15);
+        }
+
+        .glass-input {
+            background: rgba(8, 13, 23, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #F8FAFC;
+            transition: all 0.2s ease;
+        }
+
+        .glass-input:focus {
+            outline: none;
+            border-color: #00F59B;
+            box-shadow: 0 0 12px rgba(0, 245, 155, 0.25);
+        }
+
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: #111827;
+            background: rgba(6, 8, 14, 0.8);
         }
         ::-webkit-scrollbar-thumb {
-            background: #374151;
+            background: rgba(255, 255, 255, 0.15);
             border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #4b5563;
+            background: #00F59B;
+        }
+
+        /* Custom Animations */
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.8; }
+        }
+
+        .pulse-glow {
+            animation: pulseGlow 4s infinite ease-in-out;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col bg-darkBg text-gray-100">
+<body class="min-h-screen flex flex-col justify-between antialiased selection:bg-emerald-500 selection:text-black">
 
-    <!-- Header -->
-    <header class="bg-cardBg border-b border-cardBorder sticky top-0 z-50 shadow-lg">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-3">
-                <div class="bg-gradient-to-tr from-blue-600 to-emerald-500 p-2.5 rounded-xl shadow-md">
-                    <i class="fa-solid me-1 fa-chart-line text-2xl text-white"></i>
+    <!-- MAIN WRAPPER -->
+    <div id="app" class="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+        
+        <!-- HEADER -->
+        <header class="glass-card rounded-2xl p-4 md:p-6 relative overflow-hidden">
+            <div class="absolute -top-24 -right-24 w-60 h-60 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none pulse-glow"></div>
+            <div class="absolute -bottom-24 -left-24 w-60 h-60 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none pulse-glow"></div>
+            
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+                <!-- Brand Title & Tagline -->
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-emerald-500 to-cyan-400 p-[1px] shadow-neon-glow">
+                        <div class="w-full h-full bg-slate-950 rounded-[11px] flex items-center justify-center">
+                            <i class="fa-solid me-0.5 fa-chart-line text-xl text-emerald-400"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-3">
+                            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-emerald-400 bg-clip-text text-transparent">
+                                Diallo <span class="text-emerald-400 font-mono">TRADING</span>
+                            </h1>
+                            <span class="px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wider rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                                PRO v2.5
+                            </span>
+                        </div>
+                        <p class="text-xs sm:text-sm text-slate-400 mt-0.5 flex items-center gap-2">
+                            <span>Bienvenue, <strong class="text-slate-200 font-medium">Diallo AMADOU</strong></span>
+                            <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                            <span class="text-xs text-slate-500">Suivi & Performance en temps réel</span>
+                        </p>
+                    </div>
                 </div>
-                <div>
-                    <h1 class="text-2xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-blue-500">
-                        Diallo TRADING
-                    </h1>
-                    <p class="text-xs text-gray-400 font-medium">
-                        Bienvenue, <span class="text-emerald-400 font-semibold">Diallo AMADOU</span> | Suivi & Performance
+
+                <!-- Navigation Tabs & Actions -->
+                <div class="flex flex-wrap items-center justify-between lg:justify-end gap-3">
+                    <nav class="flex p-1 bg-slate-950/80 rounded-xl border border-white/10 gap-1">
+                        <button id="nav-dashboard" onclick="switchTab('dashboard')" class="nav-tab px-4 py-2 text-xs sm:text-sm font-medium rounded-lg transition-all text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 flex items-center gap-2">
+                            <i class="fa-solid fa-gauge-high"></i> Tableau de Bord
+                        </button>
+                        <button id="nav-journal" onclick="switchTab('journal')" class="nav-tab px-4 py-2 text-xs sm:text-sm font-medium text-slate-400 hover:text-white rounded-lg transition-all flex items-center gap-2">
+                            <i class="fa-solid fa-book-bookmark"></i> Journal
+                        </button>
+                        <button id="nav-plan90" onclick="switchTab('plan90')" class="nav-tab px-4 py-2 text-xs sm:text-sm font-medium text-slate-400 hover:text-white rounded-lg transition-all flex items-center gap-2">
+                            <i class="fa-solid fa-bullseye"></i> Plan 90 Jours
+                        </button>
+                    </nav>
+
+                    <div class="flex items-center gap-2">
+                        <button onclick="exportData()" title="Exporter en JSON" class="px-3 py-2 bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-medium rounded-xl border border-white/10 transition-all flex items-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-download text-emerald-400"></i> <span class="hidden sm:inline">Exporter</span>
+                        </button>
+                        <label title="Importer un fichier JSON" class="px-3 py-2 bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-medium rounded-xl border border-white/10 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm">
+                            <i class="fa-solid fa-upload text-cyan-400"></i> <span class="hidden sm:inline">Importer</span>
+                            <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)">
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- METRICS / STAT CARDS GRID -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Stat 1: Capital Actuel -->
+            <div class="glass-card glass-card-hover p-5 rounded-2xl relative overflow-hidden group">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Capital Actuel</span>
+                    <div class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
+                        <i class="fa-solid fa-wallet"></i>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <div id="stat-capital" class="text-2xl sm:text-3xl font-extrabold font-mono text-white tracking-tight">$10,000.00</div>
+                    <p class="text-xs text-slate-400 mt-1 flex items-center gap-1">
+                        Initial: <span id="stat-initial-cap" class="text-slate-300 font-mono">$10,000.00</span>
                     </p>
                 </div>
+                <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-400 opacity-80"></div>
             </div>
 
-            <!-- Navigation Tabs -->
-            <nav class="flex bg-gray-900/80 p-1.5 rounded-xl border border-gray-800 text-sm font-medium">
-                <button onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-btn px-4 py-2 rounded-lg transition-all duration-200 text-emerald-400 bg-gray-800 shadow">
-                    <i class="fa-solid fa-gauge-high mr-2"></i>Tableau de Bord
-                </button>
-                <button onclick="switchTab('journal')" id="tab-journal" class="tab-btn px-4 py-2 rounded-lg text-gray-400 hover:text-gray-200 transition-all duration-200">
-                    <i class="fa-solid fa-book-bookmark mr-2"></i>Journal
-                </button>
-                <button onclick="switchTab('plan90')" id="tab-plan90" class="tab-btn px-4 py-2 rounded-lg text-gray-400 hover:text-gray-200 transition-all duration-200">
-                    <i class="fa-solid fa-calendar-days mr-2"></i>Plan 90 Jours
-                </button>
-            </nav>
-
-            <!-- Actions Bar -->
-            <div class="flex items-center gap-2">
-                <button onclick="exportData()" title="Exporter mes données" class="px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg text-xs font-semibold flex items-center gap-1.5 border border-gray-700 transition">
-                    <i class="fa-solid fa-download text-emerald-400"></i> Exporter
-                </button>
-                <label title="Importer des données" class="px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg text-xs font-semibold flex items-center gap-1.5 border border-gray-700 cursor-pointer transition">
-                    <i class="fa-solid fa-upload text-blue-400"></i> Importer
-                    <input type="file" id="importFile" accept=".json" class="hidden" onchange="importData(event)">
-                </label>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Container -->
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-
-        <!-- Dashboard Overview Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="bg-cardBg p-5 rounded-2xl border border-cardBorder shadow-sm relative overflow-hidden">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-xs font-bold uppercase tracking-wider text-gray-400">Capital Actuel</span>
-                    <span class="p-2 bg-blue-500/10 text-blue-400 rounded-lg"><i class="fa-solid fa-wallet"></i></span>
+            <!-- Stat 2: Profit / Perte Total -->
+            <div class="glass-card glass-card-hover p-5 rounded-2xl relative overflow-hidden group">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Profit / Perte Total</span>
+                    <div id="stat-pnl-icon-bg" class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
+                        <i id="stat-pnl-icon" class="fa-solid fa-chart-line"></i>
+                    </div>
                 </div>
-                <div class="text-3xl font-extrabold text-white" id="stat-capital">$0.00</div>
-                <p class="text-xs text-gray-400 mt-2">Départ initial: <span id="stat-initial-cap" class="text-gray-300">$0.00</span></p>
-            </div>
-
-            <div class="bg-cardBg p-5 rounded-2xl border border-cardBorder shadow-sm relative overflow-hidden">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-xs font-bold uppercase tracking-wider text-gray-400">Profit / Perte Total</span>
-                    <span id="stat-pnl-icon" class="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg"><i class="fa-solid fa-chart-line"></i></span>
+                <div class="mt-3">
+                    <div id="stat-pnl" class="text-2xl sm:text-3xl font-extrabold font-mono text-emerald-400 tracking-tight">+$0.00</div>
+                    <p id="stat-pnl-percent" class="text-xs text-emerald-400 font-medium mt-1 flex items-center gap-1">
+                        +0.00%
+                    </p>
                 </div>
-                <div class="text-3xl font-extrabold" id="stat-total-pnl">$0.00</div>
-                <p class="text-xs text-gray-400 mt-2">Rendement: <span id="stat-roi" class="font-bold">0%</span></p>
+                <div id="stat-pnl-bar" class="absolute bottom-0 left-0 right-0 h-1 bg-emerald-500 opacity-80"></div>
             </div>
 
-            <div class="bg-cardBg p-5 rounded-2xl border border-cardBorder shadow-sm relative overflow-hidden">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-xs font-bold uppercase tracking-wider text-gray-400">Taux de Réussite</span>
-                    <span class="p-2 bg-amber-500/10 text-amber-400 rounded-lg"><i class="fa-solid fa-bullseye"></i></span>
+            <!-- Stat 3: Win Rate -->
+            <div class="glass-card glass-card-hover p-5 rounded-2xl relative overflow-hidden group">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Taux de Réussite</span>
+                    <div class="w-9 h-9 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center border border-cyan-500/20">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
                 </div>
-                <div class="text-3xl font-extrabold text-white" id="stat-winrate">0%</div>
-                <p class="text-xs text-gray-400 mt-2"><span id="stat-wins" class="text-emerald-400 font-semibold">0G</span> / <span id="stat-losses" class="text-red-400 font-semibold">0P</span> / <span id="stat-neutrals" class="text-gray-400 font-semibold">0N</span></p>
-            </div>
-
-            <div class="bg-cardBg p-5 rounded-2xl border border-cardBorder shadow-sm relative overflow-hidden">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-xs font-bold uppercase tracking-wider text-gray-400">Total Enregistrés</span>
-                    <span class="p-2 bg-purple-500/10 text-purple-400 rounded-lg"><i class="fa-solid fa-list-check"></i></span>
+                <div class="mt-3">
+                    <div id="stat-winrate" class="text-2xl sm:text-3xl font-extrabold font-mono text-white tracking-tight">0.0%</div>
+                    <div class="flex items-center gap-2 mt-1 text-xs font-mono">
+                        <span id="stat-wins" class="text-emerald-400">0W</span>
+                        <span class="text-slate-600">/</span>
+                        <span id="stat-losses" class="text-rose-400">0L</span>
+                        <span class="text-slate-600">/</span>
+                        <span id="stat-neutrals" class="text-slate-400">0N</span>
+                    </div>
                 </div>
-                <div class="text-3xl font-extrabold text-white" id="stat-count">0</div>
-                <p class="text-xs text-gray-400 mt-2">Trades & sessions de trading</p>
+                <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500 to-blue-500 opacity-80"></div>
             </div>
-        </div>
 
-        <!-- SECTION 1: DASHBOARD VIEW -->
-        <div id="view-dashboard" class="space-y-6">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Add Trade Form -->
-                <div class="bg-cardBg p-6 rounded-2xl border border-cardBorder shadow-md lg:col-span-1">
-                    <div class="flex items-center justify-between mb-5">
+            <!-- Stat 4: Total Trades -->
+            <div class="glass-card glass-card-hover p-5 rounded-2xl relative overflow-hidden group">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Enregistrés</span>
+                    <div class="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/20">
+                        <i class="fa-solid fa-list-check"></i>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <div id="stat-total-trades" class="text-2xl sm:text-3xl font-extrabold font-mono text-white tracking-tight">0</div>
+                    <p class="text-xs text-slate-400 mt-1 flex items-center gap-1">
+                        Jours tradés: <span id="stat-days-traded" class="text-slate-200 font-mono">0</span>
+                    </p>
+                </div>
+                <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-indigo-500 opacity-80"></div>
+            </div>
+        </section>
+
+        <!-- VIEW SECTION 1: DASHBOARD (Default) -->
+        <div id="tab-dashboard" class="tab-content space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Trade Logging Form (5 Cols) -->
+                <div class="lg:col-span-5 glass-card rounded-2xl p-6 relative">
+                    <div class="flex items-center justify-between pb-4 mb-5 border-b border-white/10">
                         <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                            <i class="fa-solid fa-square-plus text-emerald-400"></i>
-                            <span id="form-title">Nouveau Trade / Jour</span>
+                            <i class="fa-solid fa-pen-to-square text-emerald-400"></i>
+                            <span id="form-title">Enregistrer un Trade</span>
                         </h2>
-                        <button id="cancel-edit-btn" onclick="resetForm()" class="hidden text-xs text-red-400 hover:underline">Annuler modif.</button>
+                        <button id="cancel-edit-btn" onclick="resetForm()" class="hidden text-xs text-slate-400 hover:text-rose-400 transition-colors">
+                            <i class="fa-solid fa-xmark"></i> Annuler Modif
+                        </button>
                     </div>
 
-                    <form id="trade-form" onsubmit="handleFormSubmit(event)" class="space-y-4">
-                        <input type="hidden" id="edit-id">
-
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-400 mb-1">Date</label>
-                            <input type="date" id="trade-date" required class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2.5 text-sm text-gray-100 focus:outline-none focus:border-emerald-500 transition">
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-3">
+                    <form id="trade-form" onsubmit="handleTradeSubmit(event)" class="space-y-4">
+                        <input type="hidden" id="trade-edit-id" value="">
+                        
+                        <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-semibold text-gray-400 mb-1">Capital Initial ($)</label>
-                                <input type="number" step="0.01" id="trade-capital" required placeholder="10.00" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2.5 text-sm text-gray-100 focus:outline-none focus:border-emerald-500 transition">
+                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Date</label>
+                                <input type="date" id="trade-date" required class="w-[#100%] glass-input rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none">
                             </div>
-
                             <div>
-                                <label class="block text-xs font-semibold text-gray-400 mb-1">Profit / Perte ($)</label>
-                                <input type="number" step="0.01" id="trade-pnl" required placeholder="Ex: 0.60 ou -0.50" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2.5 text-sm text-gray-100 focus:outline-none focus:border-emerald-500 transition">
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-400 mb-1">Statut</label>
-                                <select id="trade-status" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2.5 text-sm text-gray-100 focus:outline-none focus:border-emerald-500 transition">
-                                    <option value="Gagnant">Gagnant (Win)</option>
-                                    <option value="Perdu">Perdu (Loss)</option>
-                                    <option value="Neutre">Neutre (BE)</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-400 mb-1">Stratégie</label>
-                                <select id="trade-strategy" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2.5 text-sm text-gray-100 focus:outline-none focus:border-emerald-500 transition">
-                                    <option value="Breakout">Breakout</option>
-                                    <option value="ICT / SMC">ICT / Smart Money</option>
-                                    <option value="Suivi de Tendance">Suivi de Tendance</option>
-                                    <option value="Scalping">Scalping</option>
-                                    <option value="Rebond / Support">Rebond / Support</option>
-                                    <option value="Autre">Autre</option>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Stratégie</label>
+                                <select id="trade-strategy" required class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none">
+                                    <option value="SMC / ICT" class="bg-slate-900">SMC / ICT</option>
+                                    <option value="Breakout" class="bg-slate-900">Breakout</option>
+                                    <option value="Pullback Trend" class="bg-slate-900">Pullback Trend</option>
+                                    <option value="Scalping" class="bg-slate-900">Scalping</option>
+                                    <option value="Reversal" class="bg-slate-900">Reversal</option>
+                                    <option value="Autre" class="bg-slate-900">Autre</option>
                                 </select>
                             </div>
                         </div>
 
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-400 mb-1">Notes & Paire (Optionnel)</label>
-                            <textarea id="trade-notes" rows="2" placeholder="Ex: EUR/USD, achat après cassure du high..." class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-emerald-500 transition"></textarea>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Capital Départ ($)</label>
+                                <input type="number" step="0.01" id="trade-initial-cap" required readonly class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-400 bg-slate-950/50 cursor-not-allowed">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Résultat PnL ($)</label>
+                                <input type="number" step="0.01" id="trade-pnl" placeholder="ex: +250 ou -100" required oninput="calculateFinalCapital()" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-200">
+                            </div>
                         </div>
 
-                        <button type="submit" id="submit-btn" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition duration-200 flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-plus-circle"></i>
-                            <span>Enregistrer le Trade</span>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Capital Final ($)</label>
+                                <input type="number" step="0.01" id="trade-final-cap" readonly class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs font-mono text-emerald-400 bg-slate-950/50 font-bold">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Statut</label>
+                                <select id="trade-status" required class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none">
+                                    <option value="GAIN" class="bg-slate-900 text-emerald-400">GAIN (WIN)</option>
+                                    <option value="PERTE" class="bg-slate-900 text-rose-400">PERTE (LOSS)</option>
+                                    <option value="NEUTRE" class="bg-slate-900 text-slate-400">NEUTRE (BE)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Notes & Remarques (Optionnel)</label>
+                            <textarea id="trade-notes" rows="3" placeholder="Configuration, émotions, paire de devises, risque RR..." class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs text-slate-200 resize-none"></textarea>
+                        </div>
+
+                        <button type="submit" id="submit-trade-btn" class="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-xs uppercase tracking-wider rounded-xl shadow-neon-glow transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-plus"></i> Ajouter au Journal
                         </button>
                     </form>
                 </div>
 
-                <!-- Performance Chart -->
-                <div class="bg-cardBg p-6 rounded-2xl border border-cardBorder shadow-md lg:col-span-2 flex flex-col justify-between">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                            <i class="fa-solid fa-chart-area text-blue-400"></i>
-                            Évolution du Capital
-                        </h2>
-                        <span class="text-xs text-gray-400">Progression en temps réel</span>
+                <!-- Dynamic Evolution Chart (7 Cols) -->
+                <div class="lg:col-span-7 glass-card rounded-2xl p-6 flex flex-col justify-between">
+                    <div class="flex items-center justify-between pb-4 mb-4 border-b border-white/10">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-chart-area text-cyan-400"></i>
+                            <h2 class="text-lg font-bold text-white">Évolution du Capital</h2>
+                        </div>
+                        <span class="text-xs text-slate-400 bg-slate-900 px-3 py-1 rounded-full border border-white/5 font-mono">
+                            Temps réel
+                        </span>
                     </div>
-                    <div class="relative w-full h-72">
+
+                    <div class="relative w-full h-[320px] sm:h-[360px] flex-1">
                         <canvas id="capitalChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- SECTION 2: JOURNAL TABLE VIEW -->
-        <div id="view-journal" class="hidden space-y-4">
-            <div class="bg-cardBg p-6 rounded-2xl border border-cardBorder shadow-md">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <!-- VIEW SECTION 2: DETAILED JOURNAL TABLE (Hidden by default) -->
+        <div id="tab-journal" class="tab-content hidden space-y-4">
+            <div class="glass-card rounded-2xl p-6">
+                
+                <!-- Table Controls Header -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-4 border-b border-white/10">
                     <div>
-                        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <h2 class="text-lg font-bold text-white flex items-center gap-2">
                             <i class="fa-solid fa-table-list text-emerald-400"></i>
-                            Journal de Trading Détaillé
+                            Historique Complet des Trades
                         </h2>
-                        <p class="text-xs text-gray-400">Historique complet des transactions & performances quotidiennes</p>
+                        <p class="text-xs text-slate-400 mt-0.5">Consultez, filtrez et gérez vos transactions passées.</p>
                     </div>
-                    <div class="flex gap-2">
-                        <button onclick="clearAllData()" class="px-3 py-2 bg-red-950/40 hover:bg-red-900/60 text-red-400 border border-red-800/50 rounded-xl text-xs font-semibold transition">
-                            <i class="fa-solid fa-trash-can mr-1"></i> Réinitialiser tout
+
+                    <div class="flex flex-wrap items-center gap-3">
+                        <!-- Search input -->
+                        <div class="relative">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
+                            <input type="text" id="journal-search" placeholder="Rechercher par note, date..." oninput="filterJournalTable()" class="glass-input rounded-xl pl-9 pr-3 py-2 text-xs text-slate-200 w-48 sm:w-64">
+                        </div>
+
+                        <!-- Filter Status -->
+                        <select id="journal-filter-status" onchange="filterJournalTable()" class="glass-input rounded-xl px-3 py-2 text-xs text-slate-200">
+                            <option value="ALL" class="bg-slate-900">Tous les résultats</option>
+                            <option value="GAIN" class="bg-slate-900">Gains uniquement</option>
+                            <option value="PERTE" class="bg-slate-900">Pertes uniquement</option>
+                            <option value="NEUTRE" class="bg-slate-900">Neutres uniquement</option>
+                        </select>
+
+                        <!-- Clear All -->
+                        <button onclick="confirmClearAllTrades()" class="px-3 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-semibold rounded-xl border border-rose-500/20 transition-all flex items-center gap-1.5">
+                            <i class="fa-solid fa-trash-can"></i> Réinitialiser
                         </button>
                     </div>
                 </div>
 
-                <!-- Interactive Data Table -->
-                <div class="overflow-x-auto rounded-xl border border-gray-800">
-                    <table class="w-full text-sm text-left text-gray-300">
-                        <thead class="text-xs uppercase bg-gray-900/90 text-gray-400 font-semibold border-b border-gray-800">
-                            <tr>
-                                <th class="px-4 py-3.5"># Jour</th>
-                                <th class="px-4 py-3.5">Date</th>
-                                <th class="px-4 py-3.5">Capital Initial</th>
-                                <th class="px-4 py-3.5">Profit / Perte</th>
-                                <th class="px-4 py-3.5">Capital Final</th>
-                                <th class="px-4 py-3.5">Stratégie</th>
-                                <th class="px-4 py-3.5">Statut</th>
-                                <th class="px-4 py-3.5">Notes</th>
-                                <th class="px-4 py-3.5 text-center">Actions</th>
+                <!-- Trades Table -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-white/10 text-[11px] font-semibold uppercase tracking-wider text-slate-400 bg-slate-950/40">
+                                <th class="py-3 px-4 rounded-l-xl"># Jour</th>
+                                <th class="py-3 px-4">Date</th>
+                                <th class="py-3 px-4 font-mono">Cap. Initial</th>
+                                <th class="py-3 px-4 font-mono">PnL ($)</th>
+                                <th class="py-3 px-4 font-mono">Cap. Final</th>
+                                <th class="py-3 px-4">Stratégie</th>
+                                <th class="py-3 px-4">Statut</th>
+                                <th class="py-3 px-4">Notes</th>
+                                <th class="py-3 px-4 text-right rounded-r-xl">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="journal-tbody" class="divide-y divide-gray-800/60">
-                            <!-- Populated via Javascript -->
+                        <tbody id="journal-table-body" class="divide-y divide-white/5 text-xs text-slate-300">
+                            <!-- Dynamic Content Rendered Here -->
                         </tbody>
                     </table>
                 </div>
-                <div id="empty-journal-msg" class="text-center py-12 text-gray-500 hidden">
-                    <i class="fa-solid fa-folder-open text-4xl mb-3 block opacity-50"></i>
-                    Aucune transaction enregistrée. Remplissez le formulaire pour commencer votre journal !
+
+                <!-- Empty State Indicator -->
+                <div id="journal-empty-state" class="py-12 text-center text-slate-500 hidden">
+                    <i class="fa-solid fa-folder-open text-4xl mb-3 opacity-40"></i>
+                    <p class="text-sm font-medium">Aucun trade n'a encore été enregistré.</p>
+                    <p class="text-xs mt-1">Utilisez le Tableau de bord pour commencer votre suivi.</p>
                 </div>
             </div>
         </div>
 
-        <!-- SECTION 3: PLAN 90 DAYS (SIMULATOR) VIEW -->
-        <div id="view-plan90" class="hidden space-y-6">
-            <div class="bg-cardBg p-6 rounded-2xl border border-cardBorder shadow-md">
-                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
+        <!-- VIEW SECTION 3: 90-DAY PLAN SIMULATOR (Hidden by default) -->
+        <div id="tab-plan90" class="tab-content hidden space-y-6">
+            <!-- Simulator Controls -->
+            <div class="glass-card rounded-2xl p-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-white/10">
                     <div>
-                        <h2 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-blue-400 flex items-center gap-2">
-                            <i class="fa-solid fa-bullseye text-emerald-400"></i>
-                            Plan de Croissance 90 Jours
+                        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-calculator text-cyan-400"></i>
+                            Simulateur de Croissance Composée (90 Jours)
                         </h2>
-                        <p class="text-xs text-gray-400 mt-1">
-                            Inspiré de la stratégie de composition des intérêts (ex: 10$ de départ à 6% de gain quotidien).
-                        </p>
+                        <p class="text-xs text-slate-400 mt-0.5">Projetez l'évolution théorique de votre capital grâce aux intérêts composés.</p>
                     </div>
 
-                    <!-- Simulator Controls -->
-                    <div class="flex flex-wrap items-center gap-3 bg-gray-900 p-3 rounded-xl border border-gray-800">
+                    <!-- Simulator Inputs -->
+                    <div class="flex flex-wrap items-center gap-4">
                         <div>
-                            <label class="block text-[10px] uppercase tracking-wider text-gray-400 font-bold mb-1">Capital Départ ($)</label>
-                            <input type="number" id="sim-start" value="10" class="w-24 bg-cardBg border border-gray-700 rounded-lg px-2.5 py-1 text-sm font-semibold text-white focus:outline-none focus:border-emerald-500">
+                            <label class="block text-[11px] font-semibold uppercase text-slate-400 mb-1">Capital Initial ($)</label>
+                            <input type="number" id="sim-start-cap" value="10000" class="glass-input rounded-xl px-3.5 py-2 text-xs font-mono text-emerald-400 font-bold w-32">
                         </div>
                         <div>
-                            <label class="block text-[10px] uppercase tracking-wider text-gray-400 font-bold mb-1">% Gain / Jour</label>
-                            <input type="number" id="sim-rate" value="6" step="0.5" class="w-20 bg-cardBg border border-gray-700 rounded-lg px-2.5 py-1 text-sm font-semibold text-white focus:outline-none focus:border-emerald-500">
+                            <label class="block text-[11px] font-semibold uppercase text-slate-400 mb-1">Objectif/Jour (%)</label>
+                            <input type="number" step="0.1" id="sim-daily-rate" value="2.0" class="glass-input rounded-xl px-3.5 py-2 text-xs font-mono text-cyan-400 font-bold w-24">
                         </div>
-                        <div class="flex items-end">
-                            <button onclick="generatePlan90Table()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-1.5 rounded-lg text-xs transition">
-                                Re-calculer
+                        <div class="self-end">
+                            <button onclick="calculate90DayPlan()" class="px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-slate-950 font-bold text-xs uppercase tracking-wider rounded-xl shadow-cyan-glow transition-all flex items-center gap-2">
+                                <i class="fa-solid fa-rotate"></i> Recalculer
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Highlight Badge -->
-                <div class="bg-emerald-950/30 border border-emerald-800/40 rounded-xl p-4 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <div class="flex items-center gap-3">
-                        <div class="p-3 bg-emerald-500/10 rounded-full text-emerald-400">
-                            <i class="fa-solid fa-rocket text-xl"></i>
-                        </div>
-                        <div>
-                            <div class="text-sm font-bold text-white">Objectif Jour 90 : <span id="sim-final-val" class="text-emerald-400 font-black text-lg">$0.00</span></div>
-                            <div class="text-xs text-gray-400">Discipline, gestion du risque et régularité quotidienne sont vos clés.</div>
-                        </div>
+                <!-- Simulation Summary Header -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+                    <div class="p-4 rounded-xl bg-slate-950/60 border border-white/5">
+                        <span class="text-xs text-slate-400">Capital Cible au Jour 90</span>
+                        <div id="sim-final-target" class="text-2xl font-extrabold font-mono text-emerald-400 mt-1">$59,431.33</div>
                     </div>
-                    <div class="text-xs text-gray-300 bg-gray-900/80 px-3 py-2 rounded-lg border border-gray-800">
-                        Total Multiplicateur: <span id="sim-multiplier" class="font-bold text-emerald-400">0x</span>
+                    <div class="p-4 rounded-xl bg-slate-950/60 border border-white/5">
+                        <span class="text-xs text-slate-400">Profit Théorique Total</span>
+                        <div id="sim-total-profit" class="text-2xl font-extrabold font-mono text-cyan-400 mt-1">+$49,431.33</div>
+                    </div>
+                    <div class="p-4 rounded-xl bg-slate-950/60 border border-white/5">
+                        <span class="text-xs text-slate-400">Multiplicateur de Capital</span>
+                        <div id="sim-multiplier" class="text-2xl font-extrabold font-mono text-purple-400 mt-1">5.94x</div>
                     </div>
                 </div>
+            </div>
 
-                <!-- 3 Columns Plan Display matching image style -->
-                <div id="plan90-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Populated via Javascript -->
-                </div>
+            <!-- 90 Days Grid -->
+            <div id="plan-90-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                <!-- Dynamic Day Cards Generated Here -->
             </div>
         </div>
 
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-cardBg border-t border-cardBorder py-6 mt-12 text-center text-xs text-gray-500">
-        <p>© 2026 <strong class="text-gray-300">Diallo TRADING</strong>. Développé pour Diallo AMADOU. Tous droits réservés.</p>
-        <p class="mt-1 text-gray-600">Le trading comporte des risques importants. Gérez votre capital de manière responsable.</p>
-    </footer>
-
-    <!-- Notification Toast -->
-    <div id="toast" class="fixed bottom-5 right-5 transform translate-y-20 opacity-0 transition-all duration-300 bg-gray-800 text-white border border-gray-700 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 z-50">
-        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
-        <span id="toast-msg" class="text-sm font-medium">Action effectuée</span>
     </div>
 
+    <!-- TOAST NOTIFICATION SYSTEM CONTAINER -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- FOOTER -->
+    <footer class="w-full border-t border-white/10 mt-12 py-6 bg-slate-950/80 backdrop-blur-md">
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+            <div class="flex items-center gap-2">
+                <span class="font-bold text-slate-400">Diallo TRADING</span>
+                <span>© 2026 Tous droits réservés.</span>
+            </div>
+            <p class="text-center sm:text-right text-[11px] max-w-xl text-slate-600">
+                Avertissement: Le trading comporte des risques financiers élevés. Ce journal est un outil de suivi personnel et de simulation à but éducatif.
+            </p>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC & STATE MANAGEMENT -->
     <script>
-        // State management
-        let trades = JSON.parse(localStorage.getItem('diallo_trades')) || [];
-        let chartInstance = null;
+        // ==========================================
+        // STATE MANAGEMENT & LOCAL STORAGE
+        // ==========================================
+        const INITIAL_CAPITAL = 10000.00;
 
-        // Initialize App
-        window.onload = function() {
-            // Set default date to today in form
-            document.getElementById('trade-date').valueAsDate = new Date();
-            
-            // Load Demo Data if empty
-            if (trades.length === 0) {
-                initDemoData();
-            }
-
-            renderDashboard();
-            generatePlan90Table();
+        let appState = {
+            trades: [],
+            simStartCap: 10000,
+            simDailyRate: 2.0
         };
 
-        // Load initial dummy trades matching user pattern if completely clean
-        function initDemoData() {
-            trades = [
-                { id: 1, date: '2026-09-01', capital: 10.00, pnl: 0.60, strategy: 'Breakout', status: 'Gagnant', notes: 'Premier jour - objectif 6%' },
-                { id: 2, date: '2026-09-02', capital: 10.60, pnl: 0.64, strategy: 'ICT / SMC', status: 'Gagnant', notes: 'Confirmation FVG' },
-                { id: 3, date: '2026-09-03', capital: 11.24, pnl: 0.67, strategy: 'Scalping', status: 'Gagnant', notes: 'Paire EURUSD' },
-                { id: 4, date: '2026-09-04', capital: 11.91, pnl: -0.40, strategy: 'Suivi de Tendance', status: 'Perdu', notes: 'Stop loss touché' }
-            ];
-            saveTrades();
-        }
+        let capitalChart = null;
 
-        // Save to LocalStorage
-        function saveTrades() {
-            localStorage.setItem('diallo_trades', JSON.stringify(trades));
-        }
+        // Initialize App on DOM Load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            setDefaultDate();
+            initChart();
+            updateAllViews();
+        });
 
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('text-emerald-400', 'bg-gray-800', 'shadow');
-                btn.classList.add('text-gray-400');
-            });
-
-            document.getElementById('view-dashboard').classList.add('hidden');
-            document.getElementById('view-journal').classList.add('hidden');
-            document.getElementById('view-plan90').classList.add('hidden');
-
-            document.getElementById(`tab-${tab}`).classList.add('text-emerald-400', 'bg-gray-800', 'shadow');
-            document.getElementById(`tab-${tab}`).classList.remove('text-gray-400');
-            
-            document.getElementById(`view-${tab}`).classList.remove('hidden');
-
-            if (tab === 'dashboard' || tab === 'journal') {
-                renderDashboard();
+        // Load data from LocalStorage
+        function loadState() {
+            const savedData = localStorage.getItem('diallo_trading_data');
+            if (savedData) {
+                try {
+                    appState = JSON.parse(savedData);
+                } catch(e) {
+                    console.error("Erreur de chargement LocalStorage:", e);
+                }
             }
         }
 
-        function handleFormSubmit(e) {
+        // Save state to LocalStorage
+        function saveState() {
+            localStorage.setItem('diallo_trading_data', JSON.stringify(appState));
+        }
+
+        // Default Date Picker to Today
+        function setDefaultDate() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('trade-date').value = today;
+        }
+
+        // ==========================================
+        // NAVIGATION TABS
+        // ==========================================
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.querySelectorAll('.nav-tab').forEach(btn => {
+                btn.classList.remove('text-emerald-400', 'bg-emerald-500/15', 'border', 'border-emerald-500/30');
+                btn.classList.add('text-slate-400');
+            });
+
+            const selectedContent = document.getElementById(`tab-${tabName}`);
+            const selectedBtn = document.getElementById(`nav-${tabName}`);
+
+            if (selectedContent && selectedBtn) {
+                selectedContent.classList.remove('hidden');
+                selectedBtn.classList.remove('text-slate-400');
+                selectedBtn.classList.add('text-emerald-400', 'bg-emerald-500/15', 'border', 'border-emerald-500/30');
+            }
+
+            if (tabName === 'plan90') {
+                calculate90DayPlan();
+            }
+        }
+
+        // ==========================================
+        // DYNAMIC CALCULATIONS & METRICS
+        // ==========================================
+        function getCurrentCapital() {
+            if (appState.trades.length === 0) return INITIAL_CAPITAL;
+            return appState.trades[appState.trades.length - 1].finalCap;
+        }
+
+        function calculateFinalCapital() {
+            const currentCap = getCurrentCapital();
+            const editId = document.getElementById('trade-edit-id').value;
+            
+            let baseCap = currentCap;
+            if (editId) {
+                const index = appState.trades.findIndex(t => t.id === editId);
+                if (index !== -1) {
+                    baseCap = appState.trades[index].initialCap;
+                }
+            } else {
+                document.getElementById('trade-initial-cap').value = currentCap.toFixed(2);
+            }
+
+            const pnlVal = parseFloat(document.getElementById('trade-pnl').value) || 0;
+            const finalCap = baseCap + pnlVal;
+            document.getElementById('trade-final-cap').value = finalCap.toFixed(2);
+
+            // Auto status suggestion
+            const statusSelect = document.getElementById('trade-status');
+            if (pnlVal > 0) statusSelect.value = 'GAIN';
+            else if (pnlVal < 0) statusSelect.value = 'PERTE';
+            else statusSelect.value = 'NEUTRE';
+        }
+
+        function updateMetrics() {
+            const currentCap = getCurrentCapital();
+            const totalPnL = currentCap - INITIAL_CAPITAL;
+            const pnlPercent = (totalPnL / INITIAL_CAPITAL) * 100;
+
+            const wins = appState.trades.filter(t => t.status === 'GAIN').length;
+            const losses = appState.trades.filter(t => t.status === 'PERTE').length;
+            const neutrals = appState.trades.filter(t => t.status === 'NEUTRE').length;
+            const total = appState.trades.length;
+
+            const winrate = total > 0 ? ((wins / (wins + losses || 1)) * 100).toFixed(1) : "0.0";
+
+            // Unique days count
+            const uniqueDays = new Set(appState.trades.map(t => t.date)).size;
+
+            // DOM Updates
+            document.getElementById('stat-capital').innerText = `$${currentCap.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('stat-initial-cap').innerText = `$${INITIAL_CAPITAL.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+
+            const pnlElem = document.getElementById('stat-pnl');
+            const pnlPercentElem = document.getElementById('stat-pnl-percent');
+            const pnlBar = document.getElementById('stat-pnl-bar');
+
+            if (totalPnL >= 0) {
+                pnlElem.innerText = `+$${totalPnL.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                pnlElem.className = "text-2xl sm:text-3xl font-extrabold font-mono text-emerald-400 tracking-tight";
+                pnlPercentElem.innerText = `+${pnlPercent.toFixed(2)}% de croissance`;
+                pnlPercentElem.className = "text-xs text-emerald-400 font-medium mt-1 flex items-center gap-1";
+                pnlBar.className = "absolute bottom-0 left-0 right-0 h-1 bg-emerald-500 opacity-80";
+            } else {
+                pnlElem.innerText = `-$${Math.abs(totalPnL).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                pnlElem.className = "text-2xl sm:text-3xl font-extrabold font-mono text-rose-400 tracking-tight";
+                pnlPercentElem.innerText = `${pnlPercent.toFixed(2)}% de baisse`;
+                pnlPercentElem.className = "text-xs text-rose-400 font-medium mt-1 flex items-center gap-1";
+                pnlBar.className = "absolute bottom-0 left-0 right-0 h-1 bg-rose-500 opacity-80";
+            }
+
+            document.getElementById('stat-winrate').innerText = `${winrate}%`;
+            document.getElementById('stat-wins').innerText = `${wins}W`;
+            document.getElementById('stat-losses').innerText = `${losses}L`;
+            document.getElementById('stat-neutrals').innerText = `${neutrals}N`;
+
+            document.getElementById('stat-total-trades').innerText = total;
+            document.getElementById('stat-days-traded').innerText = uniqueDays;
+
+            // Update Initial Cap input in form
+            document.getElementById('trade-initial-cap').value = currentCap.toFixed(2);
+            document.getElementById('trade-final-cap').value = currentCap.toFixed(2);
+        }
+
+        // ==========================================
+        // TRADE CRUD OPERATIONS
+        // ==========================================
+        function handleTradeSubmit(e) {
             e.preventDefault();
 
-            const editId = document.getElementById('edit-id').value;
+            const editId = document.getElementById('trade-edit-id').value;
             const date = document.getElementById('trade-date').value;
-            const capital = parseFloat(document.getElementById('trade-capital').value);
-            const pnl = parseFloat(document.getElementById('trade-pnl').value);
-            const status = document.getElementById('trade-status').value;
             const strategy = document.getElementById('trade-strategy').value;
+            const initialCap = parseFloat(document.getElementById('trade-initial-cap').value);
+            const pnl = parseFloat(document.getElementById('trade-pnl').value);
+            const finalCap = parseFloat(document.getElementById('trade-final-cap').value);
+            const status = document.getElementById('trade-status').value;
             const notes = document.getElementById('trade-notes').value;
 
             if (editId) {
-                // Update existing
-                const index = trades.findIndex(t => t.id == editId);
+                // Edit existing
+                const index = appState.trades.findIndex(t => t.id === editId);
                 if (index !== -1) {
-                    trades[index] = { id: parseInt(editId), date, capital, pnl, status, strategy, notes };
-                    showToast("Trade mis à jour avec succès !");
+                    appState.trades[index] = { id: editId, date, strategy, initialCap, pnl, finalCap, status, notes };
+                    showToast('Trade mis à jour avec succès!', 'success');
                 }
             } else {
-                // Create new
+                // Add new trade
+                const dayNumber = appState.trades.length + 1;
                 const newTrade = {
-                    id: Date.now(),
+                    id: 'trade_' + Date.now(),
+                    dayNumber,
                     date,
-                    capital,
-                    pnl,
-                    status,
                     strategy,
+                    initialCap,
+                    pnl,
+                    finalCap,
+                    status,
                     notes
                 };
-                trades.push(newTrade);
-                showToast("Nouveau trade enregistré !");
+                appState.trades.push(newTrade);
+                showToast('Nouveau trade enregistré!', 'success');
             }
 
-            // Sort trades chronologically
-            trades.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-            saveTrades();
+            // Recalculate subsequent trades if edited
+            recalculateAllTradesChain();
+            saveState();
             resetForm();
-            renderDashboard();
+            updateAllViews();
         }
 
-        function resetForm() {
-            document.getElementById('edit-id').value = '';
-            document.getElementById('trade-form').reset();
-            document.getElementById('trade-date').valueAsDate = new Date();
-            document.getElementById('submit-btn').innerHTML = `<i class="fa-solid fa-plus-circle"></i> Enregistrer le Trade`;
-            document.getElementById('form-title').innerText = "Nouveau Trade / Jour";
-            document.getElementById('cancel-edit-btn').classList.add('hidden');
+        function recalculateAllTradesChain() {
+            let runningCap = INITIAL_CAPITAL;
+            appState.trades.forEach((trade, idx) => {
+                trade.dayNumber = idx + 1;
+                trade.initialCap = runningCap;
+                trade.finalCap = runningCap + trade.pnl;
+                runningCap = trade.finalCap;
+            });
         }
 
         function editTrade(id) {
-            const trade = trades.find(t => t.id === id);
+            const trade = appState.trades.find(t => t.id === id);
             if (!trade) return;
 
-            document.getElementById('edit-id').value = trade.id;
+            document.getElementById('trade-edit-id').value = trade.id;
             document.getElementById('trade-date').value = trade.date;
-            document.getElementById('trade-capital').value = trade.capital;
-            document.getElementById('trade-pnl').value = trade.pnl;
-            document.getElementById('trade-status').value = trade.status;
             document.getElementById('trade-strategy').value = trade.strategy;
+            document.getElementById('trade-initial-cap').value = trade.initialCap.toFixed(2);
+            document.getElementById('trade-pnl').value = trade.pnl;
+            document.getElementById('trade-final-cap').value = trade.finalCap.toFixed(2);
+            document.getElementById('trade-status').value = trade.status;
             document.getElementById('trade-notes').value = trade.notes || '';
 
-            document.getElementById('submit-btn').innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Mettre à jour`;
-            document.getElementById('form-title').innerText = "Modifier le Trade";
+            document.getElementById('form-title').innerText = "Modifier le Trade #" + trade.dayNumber;
+            document.getElementById('submit-trade-btn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Enregistrer Modifs';
             document.getElementById('cancel-edit-btn').classList.remove('hidden');
 
             switchTab('dashboard');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function deleteTrade(id) {
-            if (confirm("Êtes-vous sûr de vouloir supprimer cette ligne du journal ?")) {
-                trades = trades.filter(t => t.id !== id);
-                saveTrades();
-                renderDashboard();
-                showToast("Trade supprimé", "red");
+            if (confirm("Voulez-vous vraiment supprimer ce trade ?")) {
+                appState.trades = appState.trades.filter(t => t.id !== id);
+                recalculateAllTradesChain();
+                saveState();
+                updateAllViews();
+                showToast('Trade supprimé.', 'warning');
             }
         }
 
-        function clearAllData() {
-            if (confirm("ATTENTION: Souhaitez-vous effacer l'intégralité de votre journal de trading ?")) {
-                trades = [];
-                saveTrades();
-                renderDashboard();
-                showToast("Toutes les données ont été réinitialisées", "red");
-            }
-        }
-
-        function renderDashboard() {
-            // Populate metrics
-            const totalCount = trades.length;
-            const wins = trades.filter(t => t.status === 'Gagnant').length;
-            const losses = trades.filter(t => t.status === 'Perdu').length;
-            const neutrals = trades.filter(t => t.status === 'Neutre').length;
-
-            const winRate = totalCount > 0 ? ((wins / totalCount) * 100).toFixed(1) : 0;
-            const initialCapital = trades.length > 0 ? trades[0].capital : 0;
+        function resetForm() {
+            document.getElementById('trade-edit-id').value = '';
+            document.getElementById('trade-form').reset();
+            setDefaultDate();
             
-            let totalPnl = 0;
-            trades.forEach(t => totalPnl += t.pnl);
+            document.getElementById('form-title').innerText = "Enregistrer un Trade";
+            document.getElementById('submit-trade-btn').innerHTML = '<i class="fa-solid fa-plus"></i> Ajouter au Journal';
+            document.getElementById('cancel-edit-btn').classList.add('hidden');
 
-            const currentCapital = trades.length > 0 ? (trades[trades.length - 1].capital + trades[trades.length - 1].pnl) : 0;
-            const roi = initialCapital > 0 ? ((totalPnl / initialCapital) * 100).toFixed(2) : 0;
-
-            // DOM elements
-            document.getElementById('stat-capital').innerText = `$${currentCapital.toFixed(2)}`;
-            document.getElementById('stat-initial-cap').innerText = `$${initialCapital.toFixed(2)}`;
-            
-            const pnlElem = document.getElementById('stat-total-pnl');
-            pnlElem.innerText = `${totalPnl >= 0 ? '+' : ''}$${totalPnl.toFixed(2)}`;
-            pnlElem.className = `text-3xl font-extrabold ${totalPnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`;
-
-            document.getElementById('stat-roi').innerText = `${roi >= 0 ? '+' : ''}${roi}%`;
-            document.getElementById('stat-roi').className = `font-bold ${roi >= 0 ? 'text-emerald-400' : 'text-red-400'}`;
-
-            document.getElementById('stat-winrate').innerText = `${winRate}%`;
-            document.getElementById('stat-wins').innerText = `${wins}G`;
-            document.getElementById('stat-losses').innerText = `${losses}P`;
-            document.getElementById('stat-neutrals').innerText = `${neutrals}N`;
-            document.getElementById('stat-count').innerText = totalCount;
-
-            // Update Auto-fill for Form Capital if last trade exists
-            if (trades.length > 0 && !document.getElementById('edit-id').value) {
-                const lastTrade = trades[trades.length - 1];
-                document.getElementById('trade-capital').value = (lastTrade.capital + lastTrade.pnl).toFixed(2);
-            }
-
-            renderJournalTable();
-            renderChart();
+            const currentCap = getCurrentCapital();
+            document.getElementById('trade-initial-cap').value = currentCap.toFixed(2);
+            document.getElementById('trade-final-cap').value = currentCap.toFixed(2);
         }
 
-        function renderJournalTable() {
-            const tbody = document.getElementById('journal-tbody');
-            const emptyMsg = document.getElementById('empty-journal-msg');
+        function confirmClearAllTrades() {
+            if (confirm("ATTENTION: Êtes-vous sûr de vouloir supprimer TOUT le journal de trading ?")) {
+                appState.trades = [];
+                saveState();
+                updateAllViews();
+                showToast('Journal réinitialisé à zéro.', 'danger');
+            }
+        }
+
+        // ==========================================
+        // RENDER JOURNAL TABLE
+        // ==========================================
+        function renderJournalTable(tradesToRender = appState.trades) {
+            const tbody = document.getElementById('journal-table-body');
+            const emptyState = document.getElementById('journal-empty-state');
             tbody.innerHTML = '';
 
-            if (trades.length === 0) {
-                emptyMsg.classList.remove('hidden');
+            if (tradesToRender.length === 0) {
+                emptyState.classList.remove('hidden');
                 return;
             } else {
-                emptyMsg.classList.add('hidden');
+                emptyState.classList.add('hidden');
             }
 
-            trades.forEach((trade, idx) => {
-                const finalCap = trade.capital + trade.pnl;
-                const isGain = trade.pnl >= 0;
+            tradesToRender.forEach((trade) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-900/60 transition-colors";
 
                 let statusBadge = '';
-                if (trade.status === 'Gagnant') {
-                    statusBadge = `<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-md text-xs font-semibold">Gagnant</span>`;
-                } else if (trade.status === 'Perdu') {
-                    statusBadge = `<span class="bg-red-500/10 text-red-400 border border-red-500/20 px-2.5 py-1 rounded-md text-xs font-semibold">Perdu</span>`;
+                if (trade.status === 'GAIN') {
+                    statusBadge = `<span class="px-2.5 py-1 text-[10px] font-bold rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">GAIN</span>`;
+                } else if (trade.status === 'PERTE') {
+                    statusBadge = `<span class="px-2.5 py-1 text-[10px] font-bold rounded-md bg-rose-500/10 text-rose-400 border border-rose-500/20">PERTE</span>`;
                 } else {
-                    statusBadge = `<span class="bg-gray-500/10 text-gray-400 border border-gray-500/20 px-2.5 py-1 rounded-md text-xs font-semibold">Neutre</span>`;
+                    statusBadge = `<span class="px-2.5 py-1 text-[10px] font-bold rounded-md bg-slate-500/10 text-slate-400 border border-slate-500/20">NEUTRE</span>`;
                 }
 
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-gray-800/40 transition duration-150";
+                const pnlClass = trade.pnl > 0 ? 'text-emerald-400 font-bold' : (trade.pnl < 0 ? 'text-rose-400 font-bold' : 'text-slate-400');
+                const pnlPrefix = trade.pnl > 0 ? '+' : '';
+
                 tr.innerHTML = `
-                    <td class="px-4 py-3 font-bold text-gray-400">Jour ${idx + 1}</td>
-                    <td class="px-4 py-3 text-gray-300 font-medium whitespace-nowrap">${trade.date}</td>
-                    <td class="px-4 py-3 font-medium text-gray-200">$${trade.capital.toFixed(2)}</td>
-                    <td class="px-4 py-3 font-bold ${isGain ? 'text-emerald-400' : 'text-red-400'} whitespace-nowrap">
-                        ${isGain ? '+' : ''}$${trade.pnl.toFixed(2)}
+                    <td class="py-3 px-4 font-mono font-medium text-slate-400">#${trade.dayNumber}</td>
+                    <td class="py-3 px-4 text-slate-200">${trade.date}</td>
+                    <td class="py-3 px-4 font-mono text-slate-400">$${trade.initialCap.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                    <td class="py-3 px-4 font-mono ${pnlClass}">${pnlPrefix}$${trade.pnl.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                    <td class="py-3 px-4 font-mono font-semibold text-slate-200">$${trade.finalCap.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-0.5 text-[10px] rounded bg-slate-800 text-slate-300 border border-white/5 font-mono">
+                            ${trade.strategy}
+                        </span>
                     </td>
-                    <td class="px-4 py-3 font-extrabold text-white">$${finalCap.toFixed(2)}</td>
-                    <td class="px-4 py-3 text-gray-300"><span class="bg-gray-800 px-2 py-0.5 rounded text-xs border border-gray-700">${trade.strategy}</span></td>
-                    <td class="px-4 py-3">${statusBadge}</td>
-                    <td class="px-4 py-3 text-xs text-gray-400 max-w-xs truncate">${trade.notes || '-'}</td>
-                    <td class="px-4 py-3 text-center">
-                        <div class="flex items-center justify-center gap-2">
-                            <button onclick="editTrade(${trade.id})" title="Modifier" class="p-1.5 text-blue-400 hover:bg-blue-500/10 rounded transition">
-                                <i class="fa-solid fa-pen-to-square"></i>
-                            </button>
-                            <button onclick="deleteTrade(${trade.id})" title="Supprimer" class="p-1.5 text-red-400 hover:bg-red-500/10 rounded transition">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </div>
+                    <td class="py-3 px-4">${statusBadge}</td>
+                    <td class="py-3 px-4 text-slate-400 max-w-xs truncate" title="${trade.notes || '-'}">${trade.notes || '-'}</td>
+                    <td class="py-3 px-4 text-right space-x-1">
+                        <button onclick="editTrade('${trade.id}')" class="p-1.5 text-slate-400 hover:text-emerald-400 rounded-lg hover:bg-slate-800 transition-all" title="Modifier">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button onclick="deleteTrade('${trade.id}')" class="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-800 transition-all" title="Supprimer">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        function renderChart() {
+        function filterJournalTable() {
+            const query = document.getElementById('journal-search').value.toLowerCase();
+            const statusFilter = document.getElementById('journal-filter-status').value;
+
+            const filtered = appState.trades.filter(trade => {
+                const matchesQuery = (trade.notes && trade.notes.toLowerCase().includes(query)) ||
+                                     trade.date.includes(query) ||
+                                     trade.strategy.toLowerCase().includes(query);
+
+                const matchesStatus = statusFilter === 'ALL' || trade.status === statusFilter;
+
+                return matchesQuery && matchesStatus;
+            });
+
+            renderJournalTable(filtered);
+        }
+
+        // ==========================================
+        // CHART.JS INTEGRATION
+        // ==========================================
+        function initChart() {
             const ctx = document.getElementById('capitalChart').getContext('2d');
+            
+            // Gradient fill
+            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(0, 245, 155, 0.35)');
+            gradient.addColorStop(1, 'rgba(0, 245, 155, 0.0)');
 
-            const labels = trades.map((t, i) => `Jour ${i + 1} (${t.date})`);
-            const dataPoints = trades.map(t => t.capital + t.pnl);
-
-            if (chartInstance) {
-                chartInstance.destroy();
-            }
-
-            chartInstance = new Chart(ctx, {
+            capitalChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: labels.length > 0 ? labels : ['Départ'],
+                    labels: ['Départ'],
                     datasets: [{
-                        label: 'Capital Total ($)',
-                        data: dataPoints.length > 0 ? dataPoints : [0],
-                        borderColor: '#10b981',
-                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                        borderWidth: 3,
+                        label: 'Capital ($)',
+                        data: [INITIAL_CAPITAL],
+                        borderColor: '#00F59B',
+                        borderWidth: 2.5,
+                        backgroundColor: gradient,
                         fill: true,
                         tension: 0.3,
-                        pointBackgroundColor: '#10b981',
+                        pointBackgroundColor: '#00F59B',
+                        pointBorderColor: '#0A0D14',
+                        pointBorderWidth: 2,
                         pointRadius: 4,
                         pointHoverRadius: 6
                     }]
@@ -609,101 +860,125 @@ Journal de trading interactif et gestionnaire de capital avec simulateur 90 jour
                     plugins: {
                         legend: { display: false },
                         tooltip: {
+                            backgroundColor: 'rgba(10, 13, 20, 0.9)',
+                            titleFont: { family: 'Inter', size: 12 },
+                            bodyFont: { family: 'JetBrains Mono', size: 13 },
+                            borderColor: 'rgba(0, 245, 155, 0.3)',
+                            borderWidth: 1,
+                            padding: 10,
+                            displayColors: false,
                             callbacks: {
-                                label: function(context) {
-                                    return `Capital: $${context.raw.toFixed(2)}`;
-                                }
+                                label: (context) => ` Capital: $${context.parsed.y.toLocaleString('en-US', {minimumFractionDigits: 2})}`
                             }
                         }
                     },
                     scales: {
                         x: {
                             grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                            ticks: { color: '#9ca3af', font: { size: 11 } }
+                            ticks: { color: '#64748B', font: { family: 'Inter', size: 10 } }
                         },
                         y: {
                             grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                            ticks: { color: '#9ca3af', font: { size: 11 } }
+                            ticks: { 
+                                color: '#64748B', 
+                                font: { family: 'JetBrains Mono', size: 10 },
+                                callback: (val) => '$' + val.toLocaleString()
+                            }
                         }
                     }
                 }
             });
         }
 
-        function generatePlan90Table() {
-            const container = document.getElementById('plan90-grid');
-            container.innerHTML = '';
+        function updateChart() {
+            if (!capitalChart) return;
 
-            let startCap = parseFloat(document.getElementById('sim-start').value) || 10;
-            let dailyRate = (parseFloat(document.getElementById('sim-rate').value) || 6) / 100;
+            const labels = ['Départ', ...appState.trades.map(t => `J${t.dayNumber} (${t.date})`)];
+            const data = [INITIAL_CAPITAL, ...appState.trades.map(t => t.finalCap)];
 
-            let currentCap = startCap;
-            
-            // Create 3 columns matching image layout (1-30, 31-60, 61-90)
-            const columns = [
-                { title: "Jours 1 - 30", startDay: 1, endDay: 30 },
-                { title: "Jours 31 - 60", startDay: 31, endDay: 60 },
-                { title: "Jours 61 - 90", startDay: 61, endDay: 90 }
-            ];
-
-            let dayCounter = 1;
-
-            columns.forEach(col => {
-                const colDiv = document.createElement('div');
-                colDiv.className = "bg-gray-900 rounded-xl border border-gray-800 overflow-hidden shadow-sm";
-                
-                let tableHTML = `
-                    <div class="bg-gray-800/80 px-4 py-2.5 font-bold text-xs uppercase tracking-wider text-emerald-400 border-b border-gray-700">
-                        ${col.title}
-                    </div>
-                    <table class="w-full text-xs">
-                        <thead>
-                            <tr class="bg-gray-900/50 text-gray-400 border-b border-gray-800">
-                                <th class="px-3 py-2 text-left">Jour</th>
-                                <th class="px-3 py-2 text-right">Capital</th>
-                                <th class="px-3 py-2 text-right">Profit (${(dailyRate * 100).toFixed(1)}%)</th>
-                                <th class="px-3 py-2 text-right">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-800/40">
-                `;
-
-                for (let d = col.startDay; d <= col.endDay; d++) {
-                    const profit = currentCap * dailyRate;
-                    const totalProfit = currentCap + profit;
-
-                    tableHTML += `
-                        <tr class="hover:bg-gray-800/30 transition">
-                            <td class="px-3 py-1.5 font-bold text-emerald-400">${d}</td>
-                            <td class="px-3 py-1.5 text-right text-gray-300 font-mono">$${currentCap.toFixed(2)}</td>
-                            <td class="px-3 py-1.5 text-right text-emerald-400 font-mono">+$${profit.toFixed(2)}</td>
-                            <td class="px-3 py-1.5 text-right text-white font-extrabold font-mono">$${totalProfit.toFixed(2)}</td>
-                        </tr>
-                    `;
-
-                    currentCap = totalProfit;
-                }
-
-                tableHTML += `</tbody></table>`;
-                colDiv.innerHTML = tableHTML;
-                container.appendChild(colDiv);
-            });
-
-            // Update stats
-            document.getElementById('sim-final-val').innerText = `$${currentCap.toFixed(2)}`;
-            const multiplier = (currentCap / startCap).toFixed(1);
-            document.getElementById('sim-multiplier').innerText = `${multiplier}x`;
+            capitalChart.data.labels = labels;
+            capitalChart.data.datasets[0].data = data;
+            capitalChart.update();
         }
 
+        // ==========================================
+        // 90-DAY COMPOUND SIMULATOR
+        // ==========================================
+        function calculate90DayPlan() {
+            const startCap = parseFloat(document.getElementById('sim-start-cap').value) || INITIAL_CAPITAL;
+            const dailyRate = parseFloat(document.getElementById('sim-daily-rate').value) || 2.0;
+
+            const grid = document.getElementById('plan-90-grid');
+            grid.innerHTML = '';
+
+            let currentCap = startCap;
+
+            for (let day = 1; day <= 90; day++) {
+                const targetProfit = currentCap * (dailyRate / 100);
+                const endCap = currentCap + targetProfit;
+
+                // Check if trade for this day exists
+                const actualTrade = appState.trades[day - 1];
+                let cardBorder = "border-white/5";
+                let statusBadge = '';
+
+                if (actualTrade) {
+                    if (actualTrade.pnl >= targetProfit) {
+                        cardBorder = "border-emerald-500/50 bg-emerald-500/5";
+                        statusBadge = `<span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">ATTEINT</span>`;
+                    } else if (actualTrade.pnl > 0) {
+                        cardBorder = "border-cyan-500/50 bg-cyan-500/5";
+                        statusBadge = `<span class="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 font-bold">PARTIEL</span>`;
+                    } else {
+                        cardBorder = "border-rose-500/50 bg-rose-500/5";
+                        statusBadge = `<span class="text-[9px] px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-400 font-bold">RATIÉ</span>`;
+                    }
+                }
+
+                const dayCard = document.createElement('div');
+                dayCard.className = `glass-card p-3.5 rounded-xl border ${cardBorder} flex flex-col justify-between hover:border-white/20 transition-all`;
+                dayCard.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-slate-300 font-mono">Jour ${day}</span>
+                        ${statusBadge}
+                    </div>
+                    <div class="space-y-1 font-mono text-[11px]">
+                        <div class="flex justify-between text-slate-400">
+                            <span>Objectif:</span>
+                            <span class="text-cyan-400 font-semibold">+$${targetProfit.toFixed(2)}</span>
+                        </div>
+                        <div class="flex justify-between text-slate-200 border-t border-white/5 pt-1">
+                            <span>Solde Cible:</span>
+                            <span class="font-bold text-emerald-400">$${endCap.toFixed(2)}</span>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(dayCard);
+
+                currentCap = endCap;
+            }
+
+            // Summary metrics update
+            const totalProfit = currentCap - startCap;
+            const multiplier = currentCap / startCap;
+
+            document.getElementById('sim-final-target').innerText = `$${currentCap.toLocaleString('en-US', {maximumFractionDigits: 2})}`;
+            document.getElementById('sim-total-profit').innerText = `+$${totalProfit.toLocaleString('en-US', {maximumFractionDigits: 2})}`;
+            document.getElementById('sim-multiplier').innerText = `${multiplier.toFixed(2)}x`;
+        }
+
+        // ==========================================
+        // IMPORT / EXPORT DATA
+        // ==========================================
         function exportData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(trades, null, 2));
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
             const downloadAnchor = document.createElement('a');
             downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `Diallo_TRADING_Journal_${new Date().toISOString().slice(0, 10)}.json`);
+            downloadAnchor.setAttribute("download", `diallo_trading_backup_${new Date().toISOString().split('T')[0]}.json`);
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
             downloadAnchor.remove();
-            showToast("Journal exporté au format JSON !");
+            showToast('Données exportées avec succès.', 'info');
         }
 
         function importData(event) {
@@ -713,37 +988,69 @@ Journal de trading interactif et gestionnaire de capital avec simulateur 90 jour
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    const imported = JSON.parse(e.target.result);
-                    if (Array.isArray(imported)) {
-                        trades = imported;
-                        saveTrades();
-                        renderDashboard();
-                        showToast("Données importées avec succès !");
+                    const importedState = JSON.parse(e.target.result);
+                    if (importedState && Array.isArray(importedState.trades)) {
+                        appState = importedState;
+                        recalculateAllTradesChain();
+                        saveState();
+                        updateAllViews();
+                        showToast('Sauvegarde importée avec succès !', 'success');
                     } else {
-                        alert("Format de fichier invalide.");
+                        showToast('Format de fichier JSON invalide.', 'danger');
                     }
-                } catch (err) {
-                    alert("Erreur lors de la lecture du fichier.");
+                } catch(err) {
+                    showToast('Erreur lors de la lecture du fichier.', 'danger');
                 }
             };
             reader.readAsText(file);
         }
 
-        function showToast(msg, color = 'emerald') {
-            const toast = document.getElementById('toast');
-            const toastMsg = document.getElementById('toast-msg');
-            const toastIcon = document.getElementById('toast-icon');
+        // Helper to Refresh Everything
+        function updateAllViews() {
+            updateMetrics();
+            renderJournalTable();
+            updateChart();
+            if (!document.getElementById('tab-plan90').classList.contains('hidden')) {
+                calculate90DayPlan();
+            }
+        }
 
-            toastMsg.innerText = msg;
-            toastIcon.className = color === 'red' ? 'fa-solid fa-circle-xmark text-red-400 text-lg' : 'fa-solid fa-circle-check text-emerald-400 text-lg';
+        // ==========================================
+        // TOAST NOTIFICATIONS
+        // ==========================================
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            let bgClass = "bg-slate-900 border-slate-700 text-slate-200";
+            let icon = "fa-circle-info text-cyan-400";
 
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            toast.classList.add('translate-y-0', 'opacity-100');
+            if (type === 'success') {
+                bgClass = "bg-slate-950 border-emerald-500/40 text-emerald-300 shadow-neon-glow";
+                icon = "fa-circle-check text-emerald-400";
+            } else if (type === 'warning') {
+                bgClass = "bg-slate-950 border-amber-500/40 text-amber-300";
+                icon = "fa-triangle-exclamation text-amber-400";
+            } else if (type === 'danger') {
+                bgClass = "bg-slate-950 border-rose-500/40 text-rose-300 shadow-rose-glow";
+                icon = "fa-circle-xmark text-rose-400";
+            }
 
+            toast.className = `pointer-events-auto px-4 py-3 rounded-xl border ${bgClass} text-xs font-medium flex items-center gap-2.5 shadow-2xl transition-all duration-300 transform translate-y-2 opacity-0`;
+            toast.innerHTML = `<i class="fa-solid ${icon} text-sm"></i> <span>${message}</span>`;
+
+            container.appendChild(toast);
+
+            // Animate In
             setTimeout(() => {
-                toast.classList.remove('translate-y-0', 'opacity-100');
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            // Auto Remove
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
         }
     </script>
 </body>
